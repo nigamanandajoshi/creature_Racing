@@ -26,9 +26,14 @@ class CreatureRaceGame {
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
 
+        // Players management
+        this.players = {};
+        this.currentPlayerId = null;
+
         // Scene preparation
         this.setupScene();
         this.setupLights();
+        this.setupWindowResize();
     }
 
     setupScene() {
@@ -67,13 +72,24 @@ class CreatureRaceGame {
         this.scene.add(directionalLight);
     }
 
+    setupWindowResize() {
+        window.addEventListener('resize', () => {
+            this.camera.aspect = window.innerWidth / window.innerHeight;
+            this.camera.updateProjectionMatrix();
+            this.renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    }
+
     start(username) {
         // Create player racer
-        this.localPlayer = createRacerGeometry();
+        const playerGeometry = new THREE.BoxGeometry(1, 2, 1);
+        const playerMaterial = new THREE.MeshStandardMaterial({ color: 0x3498db });
+        this.localPlayer = new THREE.Mesh(playerGeometry, playerMaterial);
+        this.localPlayer.position.set(0, 1, 0);
         this.scene.add(this.localPlayer);
 
         // Setup networking
-        this.networkManager = setupNetworking(this);
+        this.networkManager = setupNetworking(this, username);
 
         // Animation loop
         const animate = () => {
@@ -82,10 +98,36 @@ class CreatureRaceGame {
             // Update controls
             this.controls.update();
 
+            // Camera follow player
+            if (this.localPlayer) {
+                this.camera.position.x = this.localPlayer.position.x;
+                this.camera.position.z = this.localPlayer.position.z + 20;
+                this.camera.lookAt(this.localPlayer.position);
+            }
+
             // Render scene
             this.renderer.render(this.scene, this.camera);
         };
         animate();
+
+        // Simple keyboard controls
+        window.addEventListener('keydown', (event) => {
+            const moveSpeed = 0.5;
+            switch(event.key) {
+                case 'ArrowLeft':
+                    this.localPlayer.position.x -= moveSpeed;
+                    break;
+                case 'ArrowRight':
+                    this.localPlayer.position.x += moveSpeed;
+                    break;
+                case 'ArrowUp':
+                    this.localPlayer.position.z -= moveSpeed;
+                    break;
+                case 'ArrowDown':
+                    this.localPlayer.position.z += moveSpeed;
+                    break;
+            }
+        });
     }
 }
 
