@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Creature Race</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+        }
+        #game-container {
+            width: 100%;
+            max-width: 800px;
+            position: relative;
+        }
+        #username-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        #game-canvas {
+            border: 2px solid #333;
+            background-color: #f9f9f9;
+            width: 100%;
+            max-width: 800px;
+            height: 400px;
+        }
+        #debug-overlay {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.8);
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 300px;
+            z-index: 2000;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="username-modal" class="modal">
+            <div class="modal-content">
+                <h2>Choose Your Creature Name</h2>
+                <input type="text" id="username-input" maxlength="12" placeholder="Enter your creature name">
+                <button id="start-game">Start Racing!</button>
+            </div>
+        </div>
+        <canvas id="game-canvas"></canvas>
+        <div id="debug-overlay"></div>
+    </div>
+
+    <script>
+        // Comprehensive Debugging System
+        class GameDebugger {
+            static log(message, type = 'info') {
+                const debugOverlay = document.getElementById('debug-overlay');
+                const logEntry = document.createElement('div');
+                logEntry.textContent = `[${type.toUpperCase()}] ${message}`;
+                logEntry.style.color = type === 'error' ? 'red' : 'black';
+                debugOverlay.appendChild(logEntry);
+                console.log(message);
+            }
+
+            static clearLogs() {
+                const debugOverlay = document.getElementById('debug-overlay');
+                debugOverlay.innerHTML = '';
+            }
+        }
+
+        // Game Initialization Handler
+        class GameInitializer {
+            constructor() {
+                this.usernameModal = document.getElementById('username-modal');
+                this.usernameInput = document.getElementById('username-input');
+                this.startGameButton = document.getElementById('start-game');
+                this.gameCanvas = document.getElementById('game-canvas');
+
+                this.setupEventListeners();
+            }
+
+            setupEventListeners() {
+                // Validate username input
+                this.usernameInput.addEventListener('input', () => {
+                    const username = this.usernameInput.value.trim();
+                    this.startGameButton.disabled = username.length === 0 || username.length > 12;
+                });
+
+                // Start game button click
+                this.startGameButton.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    this.initializeGame();
+                });
+
+                // Enter key support
+                this.usernameInput.addEventListener('keypress', (event) => {
+                    if (event.key === 'Enter') {
+                        this.initializeGame();
+                    }
+                });
+            }
+
+            initializeGame() {
+                GameDebugger.clearLogs();
+                GameDebugger.log('Game initialization started');
+
+                const username = this.usernameInput.value.trim();
+
+                // Username validation
+                if (username.length === 0 || username.length > 12) {
+                    GameDebugger.log('Invalid username', 'error');
+                    alert('Please enter a valid username (1-12 characters)');
+                    return;
+                }
+
+                // Hide username modal
+                this.usernameModal.style.display = 'none';
+                GameDebugger.log(`Game started for: ${username}`);
+
+                // Canvas setup
+                this.setupGameCanvas(username);
+            }
+
+            setupGameCanvas(username) {
+                const canvas = this.gameCanvas;
+                const ctx = canvas.getContext('2d');
+
+                // Responsive canvas sizing
+                canvas.width = canvas.clientWidth;
+                canvas.height = canvas.clientHeight;
+
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Basic game initialization
+                this.drawInitialScene(ctx, username);
+            }
+
+            drawInitialScene(ctx, username) {
+                // Draw a welcome message
+                ctx.font = '24px Arial';
+                ctx.fillStyle = 'black';
+                ctx.textAlign = 'center';
+                ctx.fillText(`Welcome, ${username}!`, ctx.canvas.width / 2, ctx.canvas.height / 2);
+
+                // Draw a simple track outline
+                ctx.strokeStyle = 'gray';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(50, 100, ctx.canvas.width - 100, 200);
+
+                GameDebugger.log('Initial game scene drawn');
+            }
+        }
+
+        // Initialize game when DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                new GameInitializer();
+                GameDebugger.log('Game system initialized successfully');
+            } catch (error) {
+                GameDebugger.log(`Initialization error: ${error.message}`, 'error');
+            }
+        });
+    </script>
+</body>
+</html>
