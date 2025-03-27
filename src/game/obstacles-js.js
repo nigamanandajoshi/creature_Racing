@@ -1,6 +1,3 @@
-import * as THREE from 'three';
-import { createObstacleGeometry } from './texture-utils.js';
-
 class ObstacleManager {
     constructor(scene) {
         this.scene = scene;
@@ -13,7 +10,7 @@ class ObstacleManager {
             
             obstacle.position.set(
                 Math.random() * maxWidth - (maxWidth / 2),
-                0.5,
+                1,  // Slightly raised from ground
                 -Math.random() * maxDepth
             );
 
